@@ -3383,8 +3383,38 @@ const tap = Gesture.Tap().onEnd((e) => {
       },
       {
         id: 22,
+        name: "App + QR Code",
+        badge: "Slide 22 • App Prático",
+        title: "App Prático: Avengers Doomsday",
+        subtitle: "Escaneie o QR Code do Tunnel ou explore os efeitos em Skia",
+        render: () => <SlideDoomsdayQrInteractive />,
+      },
+      {
+        id: 23,
+        name: "Obrigada!",
+        badge: "Encerramento",
+        render: () => (
+          <div className="flex flex-col items-center justify-center text-center h-full max-w-3xl mx-auto gap-5">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 border border-emerald-200 text-emerald-700 font-mono text-sm font-semibold shadow-sm">
+              <Icon name="sparkles" className="w-4 h-4" />
+              <span>@shopify/react-native-skia</span>
+            </div>
+            <h2 className="text-6xl md:text-8xl font-extrabold tracking-tight bg-gradient-to-r from-sky-500 via-violet-500 to-emerald-500 bg-clip-text text-transparent leading-tight">
+              Obrigada!
+            </h2>
+            <p className="text-xl md:text-2xl text-slate-600 font-medium">
+              Espaço aberto para dúvidas
+            </p>
+            <div className="mt-2 px-5 py-2 rounded-full bg-white/80 border border-slate-200 text-slate-700 text-sm md:text-base font-medium shadow-sm">
+              Apresentado por: <strong className="text-slate-900 font-bold">Nicoli Dos Santos</strong>
+            </div>
+          </div>
+        ),
+      },
+      {
+        id: 24,
         name: "Fontes",
-        badge: "Slide 22 • Referências",
+        badge: "Slide 24 • Referências",
         title: "Fontes e Referências",
         subtitle: "Documentação oficial e materiais utilizados nesta apresentação",
         render: () => (
@@ -3445,36 +3475,6 @@ const tap = Gesture.Tap().onEnd((e) => {
                 </div>
               </div>
             ))}
-          </div>
-        ),
-      },
-      {
-        id: 23,
-        name: "App + QR Code",
-        badge: "Slide 23 • App Prático",
-        title: "App Prático: Avengers Doomsday",
-        subtitle: "Escaneie o QR Code do Tunnel ou explore os efeitos em Skia",
-        render: () => <SlideDoomsdayQrInteractive />,
-      },
-      {
-        id: 24,
-        name: "Obrigada!",
-        badge: "Encerramento",
-        render: () => (
-          <div className="flex flex-col items-center justify-center text-center h-full max-w-3xl mx-auto gap-5">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 border border-emerald-200 text-emerald-700 font-mono text-sm font-semibold shadow-sm">
-              <Icon name="sparkles" className="w-4 h-4" />
-              <span>@shopify/react-native-skia</span>
-            </div>
-            <h2 className="text-6xl md:text-8xl font-extrabold tracking-tight bg-gradient-to-r from-sky-500 via-violet-500 to-emerald-500 bg-clip-text text-transparent leading-tight">
-              Obrigada!
-            </h2>
-            <p className="text-xl md:text-2xl text-slate-600 font-medium">
-              Espaço aberto para dúvidas
-            </p>
-            <div className="mt-2 px-5 py-2 rounded-full bg-white/80 border border-slate-200 text-slate-700 text-sm md:text-base font-medium shadow-sm">
-              Apresentado por: <strong className="text-slate-900 font-bold">Nicoli Dos Santos</strong>
-            </div>
           </div>
         ),
       },

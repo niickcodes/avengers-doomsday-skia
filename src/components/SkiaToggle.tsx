@@ -10,6 +10,7 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 
 interface SkiaToggleProps {
@@ -18,6 +19,7 @@ interface SkiaToggleProps {
 }
 
 export const SkiaToggle: React.FC<SkiaToggleProps> = ({ enabled, onToggle }) => {
+  const insets = useSafeAreaInsets();
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -25,7 +27,7 @@ export const SkiaToggle: React.FC<SkiaToggleProps> = ({ enabled, onToggle }) => 
   }));
 
   const handlePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     onToggle();
   };
 
@@ -37,8 +39,18 @@ export const SkiaToggle: React.FC<SkiaToggleProps> = ({ enabled, onToggle }) => 
     scale.value = withSpring(1);
   };
 
+  // Respeita o entalhe da câmera (Dynamic Island no iOS / Hole-Punch na MIUI/Samsung) em modo paisagem
+  const safeTop = Math.max(12, insets.top + 4);
+  const safeLeft = Math.max(16, insets.left + 8);
+
   return (
-    <Animated.View style={[styles.container, animatedStyle]}>
+    <Animated.View
+      style={[
+        styles.container,
+        { top: safeTop, left: safeLeft },
+        animatedStyle,
+      ]}
+    >
       <Pressable
         style={[
           styles.pill,

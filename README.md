@@ -17,7 +17,7 @@ Aplicação interativa cinematográfica em **React Native com Expo (100% compat�
   - Tag da equipe/facção e **Nome do Personagem/Equipe**.
   - **Curiosidade Oficial** (fatos reais dos quadrinhos da Marvel e da produção de *Avengers: Doomsday*).
   - Dica interativa do poder do emblema e indicador de navegação (*"Arraste para o lado para trocar • Toque no emblema para ativar"*).
-- **Canto Superior Esquerdo (`Skia GPU FX: ON / OFF`):** Botão discreto para demonstração técnica em sala de aula, desligando gradientes metálicos, `SweepGradient`, `BlurMask`, `BackdropBlur` e partículas para comparar formas básicas 2D vs. gráficos realistas acelerados pela GPU.
+- **Canto Superior Esquerdo (`Skia GPU FX: ON / OFF`):** Botão discreto para demonstração técnica em sala de aula (inicia em **OFF** para facilitar a comparação ao vivo), ligando/desligando gradientes metálicos, `SweepGradient`, `BlurMask`, `BackdropBlur` e partículas para comparar formas básicas 2D vs. gráficos realistas acelerados pela GPU.
 
 ---
 
@@ -41,10 +41,52 @@ Aplicação interativa cinematográfica em **React Native com Expo (100% compat�
 
 ---
 
-## 🚀 Como Executar no Expo Go
+## 🚀 Passo a Passo Seguro para Apresentar na Sala de Aula
+
+> **Importante:** O app inicia com **Skia GPU FX: OFF** no canto superior esquerdo para você mostrar a versão simples primeiro e depois tocar no botão para ativar os efeitos de GPU ao vivo.
+
+### 1. Verificar / Instalar o que pode faltar no PC da sala (Windows)
+Abra o **PowerShell** (ou Terminal) e verifique se `git` e `node` estão instalados:
 
 ```powershell
-cd "C:\Users\Nick\.gemini\antigravity\scratch\avengers-skia-poster"
-npx expo start -c
+node -v
+npm -v
+git --version
 ```
-Abra o **Expo Go** no seu smartphone e escaneie o QR Code — o aplicativo travará automaticamente em modo paisagem (*landscape*).
+
+- **Se `node` não for reconhecido:** instale o Node.js LTS pelo `winget` (sem precisar abrir navegador):
+  ```powershell
+  winget install --id OpenJS.NodeJS.LTS -e --accept-package-agreements --accept-source-agreements
+  ```
+  *(Depois feche e abra o PowerShell novamente para atualizar o `PATH`).*
+- **Se `git` não for reconhecido:** instale pelo `winget` ou baixe o ZIP direto no GitHub (`Code → Download ZIP`):
+  ```powershell
+  winget install --id Git.Git -e --accept-package-agreements --accept-source-agreements
+  ```
+
+### 2. Baixar o projeto e instalar dependências
+```powershell
+git clone https://github.com/niickcodes/avengers-doomsday-skia.git
+cd avengers-doomsday-skia
+npm install
+```
+
+*(Caso o `git` não esteja instalado e você tenha baixado o `.zip`, extraia a pasta, entre nela pelo terminal e rode apenas `npm install`).*
+
+### 3. Iniciar o servidor para a turma escanear o QR Code
+No terminal dentro da pasta do projeto, rode **com túnel** (funciona mesmo com os celulares nos dados móveis ou em Wi-Fi diferente):
+
+```powershell
+npx expo start --tunnel -c
+```
+
+- **Se pedir para instalar `@expo/ngrok`:** digite `y` e pressione Enter.
+- **Mantenha essa janela do terminal aberta durante toda a apresentação** — se fechar o terminal, o QR Code para de responder.
+- Peça para quem for testar abrir o app **Expo Go** (SDK 58 / versão `58.0.5`+) no celular e escanear o QR Code que apareceu no terminal.
+
+### 4. Plano B (se o firewall da sala bloquear o `--tunnel`)
+1. **Mesmo Wi-Fi (LAN):** Conecte o PC e o celular na mesma rede Wi-Fi (ou roteie a internet do seu celular para o PC) e rode:
+   ```powershell
+   npx expo start -c
+   ```
+2. **Direto da nuvem (`expo.dev`) no seu celular:** Abra o **Expo Go**, faça login na conta **`niickcodes`** e abra o projeto direto na aba **Home** (ou pelo QR Code de *Updates* no painel `expo.dev`) — não depende de servidor no PC.

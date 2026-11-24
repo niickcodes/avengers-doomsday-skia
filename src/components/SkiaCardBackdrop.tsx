@@ -49,9 +49,9 @@ export const SkiaCardBackdrop: React.FC<SkiaCardBackdropProps> = ({
 
   return (
     <Group>
-      {/* 1. Vidro Fosco Acelerado pela GPU (<BackdropBlur blur={20}>) */}
-      <BackdropBlur blur={20} clip={cardRRect}>
-        <Fill color="rgba(6, 12, 18, 0.72)" />
+      {/* 1. Vidro Fosco Acelerado pela GPU (<BackdropBlur blur={16}> otimizado para intermediários) */}
+      <BackdropBlur blur={16} clip={cardRRect}>
+        <Fill color="rgba(6, 12, 18, 0.74)" />
       </BackdropBlur>
 
       {/* 2. Reflexo Interno Sutil de Vidro */}

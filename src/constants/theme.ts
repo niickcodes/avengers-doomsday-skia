@@ -103,10 +103,10 @@ export const SLIDES: SlideMetadata[] = [
 
 export const THEME = {
   counts: {
-    distantStars: 65,
-    foregroundStardust: 38,
-    orbitalSparks: 64,
-    shockwaveSparks: 28,
+    distantStars: 48,
+    foregroundStardust: 24,
+    orbitalSparks: 36,
+    shockwaveSparks: 20,
   },
   doomsday: {
     bgGradient: ['#010503', '#05140b', '#0b2616', '#020704'],

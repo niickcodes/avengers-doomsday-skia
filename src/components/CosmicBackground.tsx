@@ -95,23 +95,23 @@ export const CosmicBackground: React.FC<CosmicBackgroundProps> = ({
       </Rect>
 
       {/* 2. Nebulosa Primária no Palco Esquerdo */}
-      <Circle c={nebula1Center} r={height * 0.65}>
+      <Circle c={nebula1Center} r={height * 0.62}>
         <RadialGradient
           c={nebula1Center}
-          r={height * 0.65}
+          r={height * 0.62}
           colors={[slide.nebulaPrimary, 'rgba(0,0,0,0)']}
         />
-        <BlurMask style="normal" blur={34} />
+        <BlurMask style="normal" blur={22} />
       </Circle>
 
       {/* 3. Nebulosa Secundária atrás do Card Direito (Realça o BackdropBlur) */}
-      <Circle c={nebula2Center} r={height * 0.58}>
+      <Circle c={nebula2Center} r={height * 0.55}>
         <RadialGradient
           c={nebula2Center}
-          r={height * 0.58}
+          r={height * 0.55}
           colors={[slide.nebulaSecondary, 'rgba(0,0,0,0)']}
         />
-        <BlurMask style="normal" blur={30} />
+        <BlurMask style="normal" blur={20} />
       </Circle>
 
       {/* 4. Camada 1: Estrelas Distantes */}

@@ -87,8 +87,8 @@ export const PosterMode: React.FC<PosterModeProps> = ({
 
       {/* 2. Partículas e Runas Esmeraldas Flutuantes ao redor de (cx, cy) */}
       <Group>
-        <BlurMask style="normal" blur={3} />
-        {particles.slice(0, 44).map((p) => (
+        <BlurMask style="normal" blur={2.5} />
+        {particles.map((p) => (
           <OrbitalSpark
             key={p.id}
             cx={cx}

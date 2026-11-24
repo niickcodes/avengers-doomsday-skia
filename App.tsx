@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, Component, ErrorInfo, ReactNode } from 'react';
 import {
   StyleSheet,
   View,
+  Text,
+  Pressable,
   useWindowDimensions,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -11,6 +13,10 @@ import {
   Gesture,
   GestureDetector,
 } from 'react-native-gesture-handler';
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import { Canvas, Group } from '@shopify/react-native-skia';
 import {
   useSharedValue,
@@ -43,49 +49,87 @@ import {
   generateOrbitalSparks,
 } from './src/utils/particleHelpers';
 
-export default function App() {
-  const { width, height } = useWindowDimensions();
+function MainExperience() {
+  const { width: rawWidth, height: rawHeight } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
 
-  // Estado do slide atual (0 a 4) e chave de demonstração Skia GPU FX
+  // Garante dimensões válidas maiores que zero mesmo durante rotação na MIUI/iOS
+  const width = Math.max(rawWidth, 320);
+  const height = Math.max(rawHeight, 240);
+
+  // Estado do slide atual (0 a 4) e chave de demonstração Skia GPU FX (inicia OFF para demonstrar a diferença ao ativar)
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-  const [skiaEffectsEnabled, setSkiaEffectsEnabled] = useState(true);
+  const [skiaEffectsEnabled, setSkiaEffectsEnabled] = useState(false);
 
   const currentSlide = SLIDES[currentSlideIndex] ?? SLIDES[0];
   const slideIndexSV = useSharedValue(0);
 
-  // Travar orientação automaticamente em Modo Paisagem (LANDSCAPE) ao abrir
+  // Travar orientação automaticamente em Modo Paisagem (LANDSCAPE) com try/catch seguro para MIUI/split-screen
   useEffect(() => {
-    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE).catch(
-      () => {}
-    );
+    let isMounted = true;
+    const lockLandscape = async () => {
+      try {
+        await ScreenOrientation.lockAsync(
+          ScreenOrientation.OrientationLock.LANDSCAPE
+        );
+      } catch {
+        // Fallback silencioso para celulares Xiaomi/MIUI com restrição de rotação ou tela dividida
+        try {
+          if (isMounted) {
+            await ScreenOrientation.lockAsync(
+              ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT
+            );
+          }
+        } catch {
+          // Ignora silenciosamente sem travar o app
+        }
+      }
+    };
+    lockLandscape();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // ============================================================================
-  // GEOMETRIA DIVIDIDA EM PAISAGEM (55% Palco Esquerdo | 45% Card Direito)
+  // GEOMETRIA DIVIDIDA EM PAISAGEM RESPEITANDO SAFE AREA (Notch / Dynamic Island)
   // ============================================================================
+  const safeBounds = useMemo(() => {
+    const safeLeft = Math.max(insets.left, 10);
+    const safeRight = Math.max(insets.right, 10);
+    const safeTop = Math.max(insets.top, 8);
+    const safeBottom = Math.max(insets.bottom, 8);
+    const usableWidth = Math.max(280, width - safeLeft - safeRight);
+    const usableHeight = Math.max(200, height - safeTop - safeBottom);
+    return { safeLeft, safeRight, safeTop, safeBottom, usableWidth, usableHeight };
+  }, [width, height, insets.left, insets.right, insets.top, insets.bottom]);
+
   const stageLayout = useMemo(() => {
-    const stageWidth = width * 0.55;
+    const { safeLeft, usableWidth, usableHeight } = safeBounds;
+    const stageWidth = safeLeft + usableWidth * 0.54;
     const stageHeight = height;
-    // Ponto central único (cx, cy) calculado dinamicamente pelo tamanho do palco
-    const cx = stageWidth / 2;
+    // Ponto central único (cx, cy) deslocado do notch esquerdo para nunca cortar o emblema
+    const cx = safeLeft + (usableWidth * 0.54) / 2;
     const cy = stageHeight / 2;
-    const emblemSize = Math.min(stageWidth * 0.72, stageHeight * 0.78, 250);
+    const emblemSize = Math.min(usableWidth * 0.54 * 0.74, usableHeight * 0.80, 245);
     return { stageWidth, stageHeight, cx, cy, emblemSize };
-  }, [width, height]);
+  }, [height, safeBounds]);
 
   const cardLayout = useMemo(() => {
-    const rightZoneX = width * 0.55;
-    const rightZoneWidth = width * 0.45;
-    const cardWidth = Math.max(240, rightZoneWidth - 26);
-    const cardHeight = Math.min(height - 28, 340);
-    const cardX = rightZoneX + (rightZoneWidth - cardWidth) / 2 - 4;
-    const cardY = (height - cardHeight) / 2;
+    const { safeLeft, safeTop, usableWidth, usableHeight } = safeBounds;
+    const rightZoneX = safeLeft + usableWidth * 0.54;
+    const rightZoneWidth = usableWidth * 0.46;
+    const cardWidth = Math.max(220, rightZoneWidth - 14);
+    const cardHeight = Math.min(usableHeight - 12, 336);
+    const cardX = rightZoneX + (rightZoneWidth - cardWidth) / 2;
+    const cardY = safeTop + (usableHeight - cardHeight) / 2;
     return { cardX, cardY, cardWidth, cardHeight };
-  }, [width, height]);
+  }, [safeBounds]);
 
   // Parallax do Giroscópio e Transição Horizontal de Slides
   const tiltX = useSharedValue(0);
   const tiltY = useSharedValue(0);
+  const isTouching = useSharedValue(false);
   const slideParallaxX = useSharedValue(0);
 
   // Animações contínuas na GPU
@@ -137,35 +181,66 @@ export default function App() {
     );
   }, [shimmer, doomRuneRotation, f4FlameCycle]);
 
-  // Leitura do Giroscópio a 60 FPS
+  // Leitura resiliente do Giroscópio (compatível com iOS e Android Xiaomi/Samsung/Motorola + fallback automático)
   useEffect(() => {
     let subscription: { remove: () => void } | null = null;
     let isMounted = true;
 
-    Gyroscope.isAvailableAsync().then((available) => {
-      if (!isMounted || !available) return;
-      Gyroscope.setUpdateInterval(16);
-      subscription = Gyroscope.addListener(({ x, y }) => {
-        const targetX = Math.max(-1, Math.min(1, y * 1.4));
-        const targetY = Math.max(-1, Math.min(1, x * 1.4));
-        tiltX.value = withSpring(targetX, { damping: 16, stiffness: 90 });
-        tiltY.value = withSpring(targetY, { damping: 16, stiffness: 90 });
-      });
-    });
+    const initGyroscope = async () => {
+      try {
+        const available = await Gyroscope.isAvailableAsync();
+        if (!isMounted || !available) return;
+
+        // Solicita permissão caso exigido pelo iOS / Expo Go
+        if (typeof Gyroscope.requestPermissionsAsync === 'function') {
+          try {
+            const perm = await Gyroscope.requestPermissionsAsync();
+            if (!perm.granted) return;
+          } catch {
+            // Prossegue silenciosamente se o SO não exigir permissão explícita
+          }
+        }
+
+        if (!isMounted) return;
+
+        // 32ms (~30Hz) evita throttling na MIUI/Xiaomi; o withSpring interpola a 60/120fps na GPU
+        Gyroscope.setUpdateInterval(32);
+
+        subscription = Gyroscope.addListener((data) => {
+          if (!data || isTouching.value) return;
+          const rawX = Number.isFinite(data.x) ? data.x : 0;
+          const rawY = Number.isFinite(data.y) ? data.y : 0;
+
+          const targetX = Math.max(-1, Math.min(1, rawY * 1.35));
+          const targetY = Math.max(-1, Math.min(1, rawX * 1.35));
+
+          tiltX.value = withSpring(targetX, { damping: 16, stiffness: 90 });
+          tiltY.value = withSpring(targetY, { damping: 16, stiffness: 90 });
+        });
+      } catch {
+        // Fallback automático silencioso: o app funciona 100% via toque/arraste do dedo
+      }
+    };
+
+    initGyroscope();
 
     return () => {
       isMounted = false;
-      if (subscription) subscription.remove();
+      try {
+        if (subscription) subscription.remove();
+      } catch {
+        // Ignora erro ao remover listener no unmount
+      }
     };
-  }, [tiltX, tiltY]);
+  }, [tiltX, tiltY, isTouching]);
 
-  // Funções de Feedback Tátil e Troca de Slide
+  // Funções de Feedback Tátil Seguras (não falham em aparelhos sem motor háptico)
   const triggerHapticLight = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
   }, []);
 
   const triggerHapticHeavy = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {});
   }, []);
 
   const handleSelectSlide = useCallback(
@@ -181,7 +256,7 @@ export default function App() {
 
   const changeSlideByDelta = useCallback(
     (delta: number) => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
       setCurrentSlideIndex((prev) => {
         const next = (prev + delta + SLIDES.length) % SLIDES.length;
         slideIndexSV.value = next;
@@ -205,20 +280,20 @@ export default function App() {
     });
 
     if (currentSlide.id === 'doomsday') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
     } else if (currentSlide.id === 'doom') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {});
       doomChargeProgress.value = withTiming(1, { duration: 280 }, () => {
         doomChargeProgress.value = withTiming(0, { duration: 750 });
       });
     } else if (currentSlide.id === 'fantastic4') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
       f4TouchX.value = cx;
       f4TouchY.value = cy;
       f4TouchActive.value = 1;
       f4TouchActive.value = withTiming(0, { duration: 900 });
     } else if (currentSlide.id === 'cap') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {});
       capShieldRotation.value = 0;
       capShieldRotation.value = withTiming(Math.PI * 6, {
         duration: 950,
@@ -230,7 +305,7 @@ export default function App() {
         easing: Easing.out(Easing.quad),
       });
     } else if (currentSlide.id === 'xmen') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {});
       xmenClawProgress.value = 0;
       xmenClawProgress.value = withTiming(1, {
         duration: 1150,
@@ -257,6 +332,10 @@ export default function App() {
   // GESTOS NA UI THREAD (Navegação Horizontal Parallax + Poderes dos Emblemas)
   // ============================================================================
   const panGesture = Gesture.Pan()
+    .onBegin(() => {
+      'worklet';
+      isTouching.value = true;
+    })
     .onUpdate((e) => {
       'worklet';
       const idx = slideIndexSV.value;
@@ -279,14 +358,15 @@ export default function App() {
       // Parallax horizontal durante o arrasto
       slideParallaxX.value = e.translationX * 0.35;
 
-      // Inclinação 3D suave pelo toque
+      // Inclinação 3D suave pelo toque (funciona como fallback universal sem giroscópio)
       const normX = Math.max(-1, Math.min(1, (e.x - stageLayout.cx) / (stageLayout.stageWidth * 0.5)));
       const normY = Math.max(-1, Math.min(1, (e.y - stageLayout.cy) / (stageLayout.stageHeight * 0.5)));
       tiltX.value = withSpring(normX, { damping: 14, stiffness: 120 });
       tiltY.value = withSpring(normY, { damping: 14, stiffness: 120 });
     })
-    .onEnd((e) => {
+    .onFinalize((e) => {
       'worklet';
+      isTouching.value = false;
       const idx = slideIndexSV.value;
       const inEmblemCore =
         Math.hypot(e.x - stageLayout.cx, e.y - stageLayout.cy) <
@@ -379,7 +459,7 @@ export default function App() {
       doomChargeProgress.value = withTiming(1, { duration: 320 });
       runOnJS(triggerHapticHeavy)();
     })
-    .onEnd(() => {
+    .onFinalize(() => {
       'worklet';
       doomChargeProgress.value = withTiming(0, { duration: 600 });
     });
@@ -399,7 +479,7 @@ export default function App() {
     <GestureHandlerRootView style={styles.root}>
       <StatusBar hidden />
 
-      {/* 1. Botão de Demonstração Técnica no Canto Superior Esquerdo */}
+      {/* 1. Botão de Demonstração Técnica no Canto Superior Esquerdo (com Safe Area) */}
       <SkiaToggle
         enabled={skiaEffectsEnabled}
         onToggle={() => setSkiaEffectsEnabled((v) => !v)}
@@ -424,7 +504,7 @@ export default function App() {
               skiaEffectsEnabled={skiaEffectsEnabled}
             />
 
-            {/* ZONA ESQUERDA (55% da largura): Emblema 3D/Realista Centralizado em (cx, cy) */}
+            {/* ZONA ESQUERDA (54% da área útil): Emblema 3D/Realista Centralizado em (cx, cy) */}
             <Group transform={stageParallaxTransform}>
               {currentSlide.id === 'doomsday' && (
                 <PosterMode
@@ -502,7 +582,7 @@ export default function App() {
               skiaEffectsEnabled={skiaEffectsEnabled}
             />
 
-            {/* ZONA DIREITA (45% da largura): Card Flutuante em Vidro Fosco (<BackdropBlur blur={20}>) */}
+            {/* ZONA DIREITA (46% da área útil): Card Flutuante em Vidro Fosco (<BackdropBlur blur={16}>) */}
             <SkiaCardBackdrop
               cardX={cardLayout.cardX}
               cardY={cardLayout.cardY}
@@ -515,7 +595,7 @@ export default function App() {
         </View>
       </GestureDetector>
 
-      {/* 3. Conteúdo Tipográfico do Card Flutuante (Lado Direito 45%) */}
+      {/* 3. Conteúdo Tipográfico do Card Flutuante (Lado Direito, respeitando Safe Area) */}
       <TicketCardUI
         cardX={cardLayout.cardX}
         cardY={cardLayout.cardY}
@@ -529,9 +609,91 @@ export default function App() {
   );
 }
 
+class AppErrorBoundary extends Component<
+  { children: ReactNode },
+  { hasError: boolean; errorMessage: string }
+> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false, errorMessage: '' };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return {
+      hasError: true,
+      errorMessage: error?.message || String(error),
+    };
+  }
+
+  componentDidCatch(_error: Error, _errorInfo: ErrorInfo) {
+    // Captura erros de renderização para evitar a tela genérica "Something went wrong" do Expo Go
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorTitle}>AVENGERS: DOOMSDAY // DIAGNÓSTICO</Text>
+          <Text style={styles.errorText}>{this.state.errorMessage}</Text>
+          <Pressable
+            style={styles.retryButton}
+            onPress={() => this.setState({ hasError: false, errorMessage: '' })}
+          >
+            <Text style={styles.retryButtonText}>RECARREGAR EXPERIÊNCIA</Text>
+          </Pressable>
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+export default function App() {
+  return (
+    <AppErrorBoundary>
+      <SafeAreaProvider>
+        <MainExperience />
+      </SafeAreaProvider>
+    </AppErrorBoundary>
+  );
+}
+
 const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: '#010503',
+  },
+  errorContainer: {
+    flex: 1,
+    backgroundColor: '#010503',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  errorTitle: {
+    color: '#00ff88',
+    fontSize: 14,
+    fontWeight: '900',
+    letterSpacing: 1.5,
+    marginBottom: 10,
+  },
+  errorText: {
+    color: '#f8fafc',
+    fontSize: 12,
+    textAlign: 'center',
+    marginBottom: 18,
+  },
+  retryButton: {
+    backgroundColor: 'rgba(0, 255, 136, 0.16)',
+    borderColor: '#00ff88',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  retryButtonText: {
+    color: '#00ff88',
+    fontSize: 11,
+    fontWeight: '800',
   },
 });

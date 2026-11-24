@@ -6,12 +6,12 @@
     "orientation": "landscape",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "splash": {
-      "backgroundColor": "#010503"
-    },
     "ios": {
       "supportsTablet": true,
-      "requireFullScreen": true
+      "requireFullScreen": true,
+      "infoPlist": {
+        "NSMotionUsageDescription": "O giroscópio é usado para inclinar os emblemas 3D e reagir ao movimento do celular em tempo real."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -23,6 +23,21 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/efa9f1ec-caf7-4ec6-994a-e936469776de"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "efa9f1ec-caf7-4ec6-994a-e936469776de"
+      }
+    },
+    "owner": "niickcodes"
   }
 }

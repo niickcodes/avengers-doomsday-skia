@@ -28,13 +28,13 @@ export const TicketCardUI: React.FC<TicketCardUIProps> = ({
   onActivatePower,
 }) => {
   const handleStep = (delta: number) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     const next = (slide.index + delta + SLIDES.length) % SLIDES.length;
     onSelectSlide(next);
   };
 
   const handleDotPress = (idx: number) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     onSelectSlide(idx);
   };
 

@@ -1054,23 +1054,23 @@ export function SkiaCard() {
       const [openIdx, setOpenIdx] = useState(0);
       const faqs = [
         {
-          q: "Quando vale a pena usar React Native Skia em vez de Views normais?",
-          a: "Quando precisamos de gráficos customizados, animações complexas a 60/120 FPS, filtros de imagem (como blur dinâmico), assinaturas na tela ou efeitos visuais que seriam lentos ou impossíveis usando apenas <View> e CSS tradicional. Para telas comuns de formulários, botões e listas, o React Native padrão continua sendo a melhor escolha.",
+          q: "Quando vale a pena usar o Skia?",
+          a: "Quando você precisa criar gráficos customizados, animações muito fluidas (60/120 FPS), assinaturas na tela ou efeitos visuais (como desfoque e sombras avançadas) que ficariam lentos usando Views comuns. Para telas simples de formulários, botões e listas, o React Native padrão continua sendo a melhor escolha.",
           color: "border-rose-400 ring-2 ring-rose-200",
         },
         {
-          q: "Substitui o StyleSheet?",
-          a: "Não, eles se complementam. Use StyleSheet (90%) para estrutura, textos e acessibilidade, e Skia (10%) para gráficos e shaders.",
+          q: "Ele substitui o StyleSheet?",
+          a: "Não, eles trabalham juntos. Use o StyleSheet na maior parte do app (cerca de 90%) para montar a estrutura das telas, textos e acessibilidade, e deixe o Skia (10%) apenas para os desenhos, gráficos e efeitos especiais.",
           color: "border-sky-400 ring-2 ring-sky-200",
         },
         {
-          q: "Como é a curva de aprendizado do Skia?",
-          a: "Para desenhos básicos (formas, gradientes e blur), é bem tranquila porque a API usa JSX declarativo. A curva sobe ao avançar para animações com Reanimated, posicionamento manual sem Flexbox ou shaders em SkSL.",
+          q: "É difícil aprender a usar o Skia?",
+          a: "Para desenhos básicos (formas, cores e sombras), é bem fácil porque usa a mesma estrutura visual do React. A dificuldade só aumenta se você precisar criar animações avançadas, calcular posições na tela sem Flexbox ou programar efeitos gráficos próprios (shaders).",
           color: "border-emerald-400 ring-2 ring-emerald-200",
         },
         {
           q: "Deixa o aplicativo pesado ou lento?",
-          a: "Aumenta apenas 4 MB a 6 MB no tamanho do download (o equivalente a uma música), mas deixa o app mais rápido em gráficos complexos: enquanto Views normais podem travar a 15 FPS, o Skia roda liso a 60/120 FPS direto no chip gráfico (GPU).",
+          a: "Aumenta apenas 4 MB a 6 MB no tamanho do download (o equivalente a uma música), mas deixa o app mais rápido em telas complexas: enquanto Views normais podem engasgar a 15 FPS, o Skia roda liso a 60/120 FPS direto no chip gráfico (GPU).",
           color: "border-violet-400 ring-2 ring-violet-200",
         },
       ];
@@ -3396,6 +3396,65 @@ const tap = Gesture.Tap().onEnd((e) => {
       },
       {
         id: 23,
+        name: "Libs no Doomsday",
+        badge: "Slide 23 • App Prático",
+        title: "Bibliotecas Usadas com o Skia",
+        subtitle: "Como cada biblioteca ajudou o Skia no app Avengers: Doomsday",
+        render: () => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              {
+                name: "react-native-reanimated + worklets",
+                role: "Animações a 60/120 FPS",
+                desc: "Faz as animações rodarem lisas sem travar o aplicativo, atualizando o portal e as ondas direto para o Skia desenhar na GPU.",
+                border: "border-t-sky-400",
+              },
+              {
+                name: "react-native-gesture-handler",
+                role: "Toques e Arrastos",
+                desc: "Captura os toques e arrastos do dedo (ondas de choque, troca de heróis, chamas e garras) e avisa o Skia onde desenhar.",
+                border: "border-t-violet-400",
+              },
+              {
+                name: "expo-sensors (Gyroscope)",
+                role: "Movimento do Celular",
+                desc: "Lê a inclinação física do aparelho para o Skia mover o brilho metálico dos emblemas e o fundo espacial em tempo real.",
+                border: "border-t-emerald-400",
+              },
+              {
+                name: "expo-haptics",
+                role: "Vibração Tátil",
+                desc: "Dispara vibrações no celular sincronizadas com os toques, ondas de energia e efeitos visuais desenhados pelo Skia.",
+                border: "border-t-rose-400",
+              },
+              {
+                name: "expo-screen-orientation",
+                role: "Tela Horizontal",
+                desc: "Trava o app automaticamente em modo paisagem (deitado) para aproveitar toda a tela no palco do Skia.",
+                border: "border-t-amber-400",
+              },
+              {
+                name: "expo-linear-gradient",
+                role: "Gradientes de UI",
+                desc: "Ajuda nos degradês da interface tradicional (<View>) ao redor do palco principal onde o Skia atua.",
+                border: "border-t-indigo-400",
+              },
+            ].map((lib) => (
+              <div key={lib.name} className={`glass-pastel rounded-2xl p-5 flex flex-col justify-between gap-2.5 border-t-4 ${lib.border}`}>
+                <div>
+                  <span className="inline-block text-[11px] font-mono font-bold uppercase tracking-wider text-violet-700 mb-1">
+                    {lib.role}
+                  </span>
+                  <h3 className="text-base md:text-lg font-extrabold text-slate-900 font-mono break-words">{lib.name}</h3>
+                  <p className="text-sm text-slate-700 leading-relaxed mt-2">{lib.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ),
+      },
+      {
+        id: 24,
         name: "Obrigada!",
         badge: "Encerramento",
         render: () => (
@@ -3417,9 +3476,9 @@ const tap = Gesture.Tap().onEnd((e) => {
         ),
       },
       {
-        id: 24,
+        id: 25,
         name: "Fontes",
-        badge: "Slide 24 • Referências",
+        badge: "Slide 25 • Referências",
         title: "Fontes e Referências",
         subtitle: "Documentação oficial e materiais utilizados nesta apresentação",
         render: () => (

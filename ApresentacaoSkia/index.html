@@ -2887,6 +2887,7 @@ const tap = Gesture.Tap().onEnd((e) => {
         {
           tab: "Portal",
           file: "EnergyPortal.tsx",
+          where: "Tela 1 (Avengers: Doomsday) • O portal verde/azul girando atrás do logo \"A\"",
           desc: "Anéis concêntricos e partículas orbitais girando em torno do emblema.",
           how: "O Skia recebe o ângulo da UI Thread (Reanimated) e aplica SweepGradient + BlurMask direto na GPU, sem re-renderizar o React.",
           code: `<Group transform={portalTransform} origin={vec(cx, cy)}>
@@ -2899,6 +2900,7 @@ const tap = Gesture.Tap().onEnd((e) => {
         {
           tab: "Vidro",
           file: "SkiaCardBackdrop.tsx",
+          where: "Em todas as 5 telas (lado direito) • O card translúcido com o texto dos heróis",
           desc: "Card flutuante com vidro fosco real desfocando o fundo cósmico atrás.",
           how: "O BackdropBlur lê os pixels já desenhados atrás do retângulo na GPU e aplica o desfoque em tempo real a 60 FPS.",
           code: `<BackdropBlur blur={18} clip={cardRRect}>
@@ -2911,8 +2913,9 @@ const tap = Gesture.Tap().onEnd((e) => {
         {
           tab: "Ondas",
           file: "ShockwaveSystem.tsx",
+          where: "Ao tocar na tela (em qualquer herói) • Os anéis de energia que saem do dedo",
           desc: "Cada toque na tela dispara uma onda expansiva de energia e vibração tátil.",
-          how: "O GestureDetector captura (x, y) nativamente e o Skia desenha o Circle com BlurMask expandindo na GPU sem travar o JS.",
+          how: "O GestureDetector captura (x, y) nativamente e o Skia desenha o Circle com BlurMask expandindo na GPU sem travar o JavaScript.",
           code: `const tap = Gesture.Tap().onEnd((e) => {
   runOnJS(spawnShockwave)(e.x, e.y);
 });
@@ -2924,6 +2927,7 @@ const tap = Gesture.Tap().onEnd((e) => {
         {
           tab: "Nebulosa",
           file: "CosmicBackground.tsx",
+          where: "Fundo de todas as telas (Doom, Quarteto, Capitão, X-Men) • Nuvens e estrelas",
           desc: "Fundo espacial com estrelas e nebulosas que se movem ao inclinar o celular.",
           how: "O giroscópio atualiza SharedValues (tiltX/tiltY) e o Skia recalcula o centro do RadialGradient direto na GPU.",
           code: `const nebula1Center = useDerivedValue(() =>
@@ -2937,6 +2941,7 @@ const tap = Gesture.Tap().onEnd((e) => {
         {
           tab: "Emblema",
           file: "AvengersEmblem.tsx",
+          where: "Tela 1 (Avengers: Doomsday) • O logo \"A\" metálico prateado com anel no centro",
           desc: "Logo metálico 3D com reflexo prateado e sombra projetada no palco.",
           how: "O Skia desenha os vetores (<Path>) com LinearGradient metálico e Shadow nativos, alternando para formas simples quando Skia FX está OFF.",
           code: `<Group transform={emblemTransform}>
@@ -3045,8 +3050,11 @@ const tap = Gesture.Tap().onEnd((e) => {
                 ))}
               </div>
               <div className="space-y-1.5 text-xs md:text-sm text-slate-700 leading-relaxed">
+                <p className="p-2 rounded-lg bg-emerald-50/90 border border-emerald-200 text-emerald-950">
+                  <strong className="text-emerald-700">Onde está no app:</strong> {currentEffect.where}
+                </p>
                 <p>
-                  <strong className="text-sky-800">No app:</strong> {currentEffect.desc}
+                  <strong className="text-sky-800">O que faz:</strong> {currentEffect.desc}
                 </p>
                 <p className="p-2 rounded-lg bg-white/80 border border-violet-200">
                   <strong className="text-violet-700">Como o Skia trabalha:</strong> {currentEffect.how}

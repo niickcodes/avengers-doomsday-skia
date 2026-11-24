@@ -1120,29 +1120,29 @@ export function SkiaCard() {
         if (!canvas) return;
         const ctx = canvas.getContext("2d");
 
-        let pts = Array.from({ length: 32 }, (_, i) => 62 + Math.sin(i * 0.35) * 14 + Math.cos(i * 0.18) * 8);
-        let tick = 32;
+        let phase = 0;
         let lastDraw = performance.now();
-        let lastDataUpdate = performance.now();
         let lastShownText = "";
         let id;
+
+        const samplePoint = (xNorm, t) =>
+          68 +
+          Math.sin(xNorm * 8.5 - t) * 14 +
+          Math.cos(xNorm * 4.2 - t * 0.65) * 8 +
+          Math.sin(xNorm * 14 - t * 1.3) * 3;
 
         const render = (now) => {
           id = requestAnimationFrame(render);
           const isSvg = engineRef.current === "svg";
-          // Sem Skia (SVG/JS Bridge): trava a ~12 FPS ao interagir
-          if (isSvg && now - lastDraw < 85) return;
-          lastDraw = now;
+          // Sem Skia (SVG/JS Bridge): trava a ~9 FPS ao interagir
+          if (isSvg && now - lastDraw < 110) return;
 
-          // Atualiza dados em ritmo realista (~1 novo ponto a cada 900ms)
-          if (now - lastDataUpdate >= 900) {
-            lastDataUpdate = now;
-            tick += 0.45;
-            const prev = pts[pts.length - 1];
-            const drift = Math.sin(tick * 0.7) * 5 + (Math.random() - 0.5) * 6;
-            const nextVal = Math.max(38, Math.min(98, prev + drift));
-            pts = [...pts.slice(1), nextVal];
-          }
+          const dt = Math.min((now - lastDraw) / 1000, 0.15);
+          lastDraw = now;
+          phase += dt * (isSvg ? 1.8 : 2.6);
+
+          const count = 48;
+          const pts = Array.from({ length: count }, (_, i) => samplePoint(i / (count - 1), phase));
 
           const w = canvas.width;
           const h = canvas.height;
@@ -1161,18 +1161,31 @@ export function SkiaCard() {
           const mapX = (i) => (i / (pts.length - 1)) * (w - 20) + 10;
           const mapY = (v) => h - 18 - ((v - 30) / 80) * (h - 36);
 
+          const traceSmoothCurve = () => {
+            ctx.moveTo(mapX(0), mapY(pts[0]));
+            for (let i = 0; i < pts.length - 1; i++) {
+              const x0 = mapX(i);
+              const y0 = mapY(pts[i]);
+              const x1 = mapX(i + 1);
+              const y1 = mapY(pts[i + 1]);
+              if (isSvg) {
+                ctx.lineTo(x1, y1);
+              } else {
+                const mx = (x0 + x1) / 2;
+                const my = (y0 + y1) / 2;
+                ctx.quadraticCurveTo(x0, y0, mx, my);
+              }
+            }
+            ctx.lineTo(mapX(pts.length - 1), mapY(pts[pts.length - 1]));
+          };
+
           // Área preenchida com gradiente pastel
           const areaGrad = ctx.createLinearGradient(0, 10, 0, h);
           areaGrad.addColorStop(0, isSvg ? "rgba(253, 164, 175, 0.32)" : "rgba(134, 239, 172, 0.35)");
           areaGrad.addColorStop(1, "rgba(19, 26, 43, 0)");
 
           ctx.beginPath();
-          pts.forEach((v, i) => {
-            const x = mapX(i);
-            const y = mapY(v);
-            if (i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
-          });
+          traceSmoothCurve();
           ctx.lineTo(mapX(pts.length - 1), h);
           ctx.lineTo(mapX(0), h);
           ctx.closePath();
@@ -1181,20 +1194,17 @@ export function SkiaCard() {
 
           // Linha principal
           ctx.beginPath();
-          pts.forEach((v, i) => {
-            const x = mapX(i);
-            const y = mapY(v);
-            if (i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
-          });
+          traceSmoothCurve();
           ctx.strokeStyle = isSvg ? "#fda4af" : "#86efac";
           ctx.lineWidth = lineWidthRef.current;
           ctx.stroke();
 
-          // Crosshair interativo ao clicar/passar o mouse
-          const idx = Math.max(0, Math.min(pts.length - 1, Math.round(hoverXRef.current * (pts.length - 1))));
-          const hx = mapX(idx);
-          const hy = mapY(pts[idx]);
+          // Crosshair interativo suave ao passar o mouse
+          const hoverNorm = Math.max(0, Math.min(1, hoverXRef.current));
+          const hx = hoverNorm * (w - 20) + 10;
+          const hoverVal = samplePoint(hoverNorm, phase);
+          const hy = mapY(hoverVal);
+          const idx = Math.max(0, Math.min(pts.length - 1, Math.round(hoverNorm * (pts.length - 1))));
 
           ctx.strokeStyle = "rgba(125, 211, 252, 0.55)";
           ctx.setLineDash([3, 3]);

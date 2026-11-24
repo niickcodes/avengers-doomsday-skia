@@ -3196,9 +3196,9 @@ const tap = Gesture.Tap().onEnd((e) => {
       },
       {
         id: 7,
-        name: "Efeitos UI",
-        badge: "Slide 07 • Efeitos Visuais",
-        title: "Efeitos Visuais Impossíveis no RN Comum",
+        name: "Principais Recursos",
+        badge: "Slide 07 • Principais Recursos",
+        title: "Principais Recursos do Skia",
         subtitle: "Vidro fosco real, sombras internas, brilho neon e orbes líquidas com Shaders",
         render: () => <SlideEffectsInteractive />,
       },
@@ -3276,8 +3276,59 @@ const tap = Gesture.Tap().onEnd((e) => {
       },
       {
         id: 12,
+        name: "Skia vs Similares",
+        badge: "Slide 12 • Comparativo",
+        title: "Diferenças entre Recursos Similares",
+        subtitle: "Quando escolher Skia em vez de Lottie, react-native-svg ou engines 3D",
+        render: () => (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              {
+                name: "React Native Skia",
+                tag: "Gráficos 2D & Shaders na GPU",
+                desc: "Desenha formas, gráficos dinâmicos, filtros (BackdropBlur, Shadow) e shaders interativos em tempo real direto na GPU a 60/120 FPS.",
+                border: "border-t-sky-400",
+                highlight: true,
+              },
+              {
+                name: "vs. Lottie (lottie-react-native)",
+                tag: "Animações Prontas (After Effects)",
+                desc: "Reproduz animações pré-exportadas em JSON. É ótimo para ícones e ilustrações fixas, mas não cria gráficos dinâmicos nem reage com shaders/toques pixel a pixel.",
+                border: "border-t-violet-400",
+              },
+              {
+                name: "vs. react-native-svg",
+                tag: "Vetores na Árvore Nativa",
+                desc: "Cria cada forma como um elemento nativo separado. Funciona bem para ícones estáticos, mas gargala na CPU com dezenas/centenas de itens animados.",
+                border: "border-t-emerald-400",
+              },
+              {
+                name: "vs. Three.js / Filament / TypeGPU",
+                tag: "Engines 3D",
+                desc: "São focadas em cenas 3D com câmera e profundidade. O Skia é especialista em 2D de alta performance (e pode fornecer texturas 2D para o TypeGPU).",
+                border: "border-t-rose-400",
+              },
+            ].map((item) => (
+              <div
+                key={item.name}
+                className={`glass-pastel rounded-2xl p-5 flex flex-col justify-between gap-2 border-t-4 ${item.border} ${item.highlight ? "ring-2 ring-sky-300 bg-sky-50/50" : ""}`}
+              >
+                <div>
+                  <span className="inline-block text-[11px] font-mono font-bold uppercase tracking-wider text-violet-700 mb-1">
+                    {item.tag}
+                  </span>
+                  <h3 className="text-xl font-extrabold text-slate-900">{item.name}</h3>
+                  <p className="text-sm md:text-base text-slate-700 leading-relaxed mt-2">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ),
+      },
+      {
+        id: 13,
         name: "Quando NÃO Usar",
-        badge: "Slide 12 • Boas Práticas",
+        badge: "Slide 13 • Boas Práticas",
         title: "Quando NÃO Usar Skia",
         subtitle: "Exemplo clássico: Portfólio ou telas de conteúdo tradicional",
         render: () => (
@@ -3315,39 +3366,39 @@ const tap = Gesture.Tap().onEnd((e) => {
         ),
       },
       {
-        id: 13,
+        id: 14,
         name: "Acessibilidade",
-        badge: "Slide 13 • Acessibilidade",
+        badge: "Slide 14 • Acessibilidade",
         title: "O Skia realmente não possui acessibilidade?",
         subtitle: "Como o TalkBack (Android) e o VoiceOver (iOS) enxergam o <Canvas>",
         render: () => <SlideAccessibilityInteractive />,
       },
       {
-        id: 14,
+        id: 15,
         name: "Limitações",
-        badge: "Slide 14 • Limitações",
+        badge: "Slide 15 • Limitações",
         title: "Limitações",
         subtitle: "Como as Fontes funcionam (Tipografia)",
         render: () => <SlideTypographyInteractive />,
       },
       {
-        id: 15,
+        id: 16,
         name: "Limitações: Vídeo",
-        badge: "Slide 15 • Limitações",
+        badge: "Slide 16 • Limitações",
         title: "Limitações",
         subtitle: "Reprodução de Vídeos, Câmera e 3D com TypeGPU",
         render: () => <SlideLimitationsVideoInteractive />,
       },
       {
-        id: 16,
+        id: 17,
         name: "Limitações: Canvas",
-        badge: "Slide 16 • Limitações",
+        badge: "Slide 17 • Limitações",
         title: "Limitações",
         subtitle: "O Canvas é um bloco único (Sem toques ou Flexbox nativos)",
         render: () => <SlideCanvasHitTestInteractive />,
       },
       {
-        id: 17,
+        id: 18,
         name: "Passo 1: Base",
         badge: "Construindo na Prática • Passo 1 de 4",
         title: "Construindo na Prática: Passo a Passo",
@@ -3355,7 +3406,7 @@ const tap = Gesture.Tap().onEnd((e) => {
         render: () => <ProgressiveWalletStep step={1} />,
       },
       {
-        id: 18,
+        id: 19,
         name: "Passo 2: Gráfico",
         badge: "Construindo na Prática • Passo 2 de 4",
         title: "Construindo na Prática: Passo a Passo",
@@ -3363,7 +3414,7 @@ const tap = Gesture.Tap().onEnd((e) => {
         render: () => <ProgressiveWalletStep step={2} />,
       },
       {
-        id: 19,
+        id: 20,
         name: "Passo 3: 60 FPS",
         badge: "Construindo na Prática • Passo 3 de 4",
         title: "Construindo na Prática: Passo a Passo",
@@ -3371,7 +3422,7 @@ const tap = Gesture.Tap().onEnd((e) => {
         render: () => <ProgressiveWalletStep step={3} />,
       },
       {
-        id: 20,
+        id: 21,
         name: "Passo 4: Vidro",
         badge: "Construindo na Prática • Passo 4 de 4",
         title: "Construindo na Prática: Passo a Passo",
@@ -3379,25 +3430,25 @@ const tap = Gesture.Tap().onEnd((e) => {
         render: () => <ProgressiveWalletStep step={4} />,
       },
       {
-        id: 21,
+        id: 22,
         name: "Dúvidas",
-        badge: "Slide 21 • Dúvidas",
+        badge: "Slide 22 • Dúvidas",
         title: "Dúvidas",
         subtitle: "Clique em um card para destacar a resposta",
         render: () => <Slide10Interactive />,
       },
       {
-        id: 22,
+        id: 23,
         name: "App + QR Code",
-        badge: "Slide 22 • App Prático",
+        badge: "Slide 23 • App Prático",
         title: "App Prático: Avengers Doomsday",
         subtitle: "Escaneie o QR Code do Tunnel ou explore os efeitos em Skia",
         render: () => <SlideDoomsdayQrInteractive />,
       },
       {
-        id: 23,
+        id: 24,
         name: "Libs no Doomsday",
-        badge: "Slide 23 • App Prático",
+        badge: "Slide 24 • App Prático",
         title: "Bibliotecas Usadas com o Skia",
         subtitle: "Como cada biblioteca ajudou o Skia no app Avengers: Doomsday",
         render: () => (
@@ -3454,7 +3505,7 @@ const tap = Gesture.Tap().onEnd((e) => {
         ),
       },
       {
-        id: 24,
+        id: 25,
         name: "Obrigada!",
         badge: "Encerramento",
         render: () => (
@@ -3476,9 +3527,9 @@ const tap = Gesture.Tap().onEnd((e) => {
         ),
       },
       {
-        id: 25,
+        id: 26,
         name: "Fontes",
-        badge: "Slide 25 • Referências",
+        badge: "Slide 26 • Referências",
         title: "Fontes e Referências",
         subtitle: "Documentação oficial e materiais utilizados nesta apresentação",
         render: () => (

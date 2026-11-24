@@ -1068,11 +1068,16 @@ export function SkiaCard() {
           a: "Para desenhos básicos (formas, gradientes e blur), é bem tranquila porque a API usa JSX declarativo. A curva sobe ao avançar para animações com Reanimated, posicionamento manual sem Flexbox ou shaders em SkSL.",
           color: "border-emerald-400 ring-2 ring-emerald-200",
         },
+        {
+          q: "Deixa o aplicativo pesado ou lento?",
+          a: "Aumenta apenas 4 MB a 6 MB no tamanho do download (o equivalente a uma música), mas deixa o app mais rápido em gráficos complexos: enquanto Views normais podem travar a 15 FPS, o Skia roda liso a 60/120 FPS direto no chip gráfico (GPU).",
+          color: "border-violet-400 ring-2 ring-violet-200",
+        },
       ];
 
       return (
         <div className="flex flex-col justify-center gap-5 h-full">
-          <div onClick={(e) => e.stopPropagation()} className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div onClick={(e) => e.stopPropagation()} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {faqs.map((faq, idx) => {
               const isOpen = openIdx === idx;
               return (
@@ -3375,9 +3380,9 @@ const tap = Gesture.Tap().onEnd((e) => {
       },
       {
         id: 21,
-        name: "Quando Usar",
-        badge: "Slide 21 • Resumo",
-        title: "Quando Usar & Dúvidas",
+        name: "Dúvidas",
+        badge: "Slide 21 • Dúvidas",
+        title: "Dúvidas",
         subtitle: "Clique em um card para destacar a resposta",
         render: () => <Slide10Interactive />,
       },

@@ -1134,12 +1134,12 @@ export function SkiaCard() {
         const render = (now) => {
           id = requestAnimationFrame(render);
           const isSvg = engineRef.current === "svg";
-          // Sem Skia (SVG/JS Bridge): trava a ~9 FPS ao interagir
-          if (isSvg && now - lastDraw < 110) return;
+          // Sem Skia (SVG/JS Bridge): trava a ~8 FPS ao interagir
+          if (isSvg && now - lastDraw < 130) return;
 
           const dt = Math.min((now - lastDraw) / 1000, 0.15);
           lastDraw = now;
-          phase += dt * (isSvg ? 1.8 : 2.6);
+          phase += dt * (isSvg ? 1.5 : 6.5);
 
           const count = 48;
           const pts = Array.from({ length: count }, (_, i) => samplePoint(i / (count - 1), phase));

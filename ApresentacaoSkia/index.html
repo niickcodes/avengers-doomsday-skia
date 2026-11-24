@@ -671,14 +671,11 @@
           </div>
 
           {isAndroid ? (
-            <div className="lg:col-span-5 glass-pastel rounded-2xl p-5 flex flex-col justify-center gap-3">
-              <p className="text-sm md:text-base text-slate-700 leading-relaxed bg-white/80 border border-sky-200 rounded-xl p-3.5">
-                O <strong className="text-sky-800">Skia</strong> é o motor gráfico 2D oficial do sistema Android. Ele transforma instruções de código em linhas, formas, sombras, cores e textos, usando a aceleração da GPU para renderizar tudo na tela.
-              </p>
+            <div className="lg:col-span-5 glass-pastel rounded-2xl p-4 flex items-center justify-center">
               <img
                 src="./android-skia-architecture.jpg"
                 alt="Camadas gráficas do Android com Skia"
-                className="w-full h-auto max-h-[380px] object-contain rounded-xl shadow-sm bg-white"
+                className="w-full h-auto max-h-[460px] object-contain rounded-xl shadow-sm bg-white"
               />
             </div>
           ) : (
@@ -3188,35 +3185,35 @@ const tap = Gesture.Tap().onEnd((e) => {
       },
       {
         id: 6,
+        name: "O Canvas",
+        badge: "Slide 06 • Fundamentos",
+        title: "O Canvas: A Base de Tudo",
+        subtitle: "Componente raiz obrigatório ligado direto à GPU",
+        render: () => <Slide4Interactive />,
+      },
+      {
+        id: 7,
         name: "O Problema",
-        badge: "Slide 06 • O Problema",
+        badge: "Slide 07 • O Problema",
         title: "O limite da UI tradicional",
         subtitle: "<View>, <Text> e <Image>",
         render: () => <Slide2Interactive />,
       },
       {
-        id: 7,
+        id: 8,
         name: "Principais Recursos",
-        badge: "Slide 07 • Principais Recursos",
+        badge: "Slide 08 • Principais Recursos",
         title: "Principais Recursos do Skia",
         subtitle: "Vidro fosco real, sombras internas, brilho neon e orbes líquidas com Shaders",
         render: () => <SlideEffectsInteractive />,
       },
       {
-        id: 8,
+        id: 9,
         name: "Integrações",
-        badge: "Slide 08 • Ecossistema",
+        badge: "Slide 09 • Ecossistema",
         title: "O que integrado ao Skia faz funcionar melhor?",
         subtitle: "Bibliotecas rodando fora da thread principal de JavaScript",
         render: () => <SlideIntegrationsInteractive />,
-      },
-      {
-        id: 9,
-        name: "O Canvas",
-        badge: "Slide 09 • Fundamentos",
-        title: "O Canvas: A Base de Tudo",
-        subtitle: "Componente raiz obrigatório ligado direto à GPU",
-        render: () => <Slide4Interactive />,
       },
       {
         id: 10,

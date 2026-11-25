@@ -1,4 +1,66 @@
-# 🌌 Avengers: Doomsday (2026) — Experiência Cinematográfica em Modo Paisagem (Skia GPU)
+# ⚡ React Native Skia — O Poder da GPU no Mobile
+
+> **Projeto prático da apresentação:** Experiência cinematográfica **Avengers: Doomsday (2026)** construída em **React Native + Expo** para demonstrar gráficos 2D acelerados diretamente na GPU com `@shopify/react-native-skia`.
+
+---
+
+## 🎨 O que é o React Native Skia? (Resumo & Pontos Importantes)
+
+O **Skia** é uma engine gráfica 2D de código aberto (mantida pelo Google e usada no Chrome, Android e Flutter). O **`@shopify/react-native-skia`** traz esse motor para o React Native por meio de uma API declarativa em JSX (`<Canvas>`).
+
+Enquanto a **GPU** é o hardware responsável por acender os pixels na tela (mas só entende comandos matemáticos), o **Skia atua como o "tradutor de arte 2D"**: ele converte formas, gradientes, textos, sombras e shaders em instruções otimizadas para a GPU (via **Metal** no iOS e **Vulkan / OpenGL ES** no Android).
+
+### Pontos Importantes
+- **Fluidez a 60 / 120 FPS:** Os cálculos e animações rodam fora da thread principal de JavaScript (via *Worklets* do Reanimated + JSI), evitando engasgos mesmo com centenas de elementos animados.
+- **`<Canvas>` Declarativo:** Todo desenho Skia vive dentro do componente raiz `<Canvas>`, ligado diretamente à GPU.
+- **Regra de Ouro (90% + 10%):** Use `StyleSheet`, `<View>` e `<Text>` tradicionais em ~90% do app (estrutura, listas, formulários, acessibilidade) e reserve o Skia (~10%) para gráficos, efeitos visuais avançados e interações ricas.
+- **Ecossistema Integrado:** Funciona em sinergia com `react-native-reanimated`, `react-native-gesture-handler`, `expo-sensors` (giroscópio/acelerômetro) e `expo-haptics` (vibração tátil), além de bibliotecas de gráficos como `victory-native`.
+- **Impacto no App:** Adiciona apenas cerca de **4 MB a 6 MB** ao tamanho do download, entregando em troca renderização nativa na GPU.
+- **Uso em Produção:** Adotado por apps como **Shop (Shopify)**, **Rainbow Wallet**, **Notesnook**, **Runna** e **Rippling**.
+
+---
+
+## 🎤 Apresentação — Perguntas e Respostas
+
+### Que problema ela resolve?
+A interface tradicional do React Native (`<View>`, `<Text>`, `<Image>`) é excelente para telas comuns, mas **gargala na CPU** quando precisa animar dezenas ou centenas de elementos simultâneos e **não oferece nativamente** recursos visuais avançados como vidro fosco real (*backdrop blur*), sombras internas, neon/brilho difuso ou *shaders* programáveis. O React Native Skia resolve esse limite levando o desenho 2D complexo diretamente para a **GPU**, mantendo 60/120 FPS.
+
+### Quais os principais recursos?
+- **Formas Vetoriais e Caminhos (`Path`, `Circle`, `Rect`, `Group`):** Desenho procedural preciso e composição hierárquica na GPU.
+- **Gradientes Avançados:** `LinearGradient`, `RadialGradient` e `SweepGradient` (cônico, ideal para reflexos metálicos).
+- **Efeitos Visuais Cinematográficos:**
+  - `BackdropBlur` (efeito vidro fosco / *glassmorphism* real em tempo real);
+  - `BlurMask` (brilho neon e auras luminosas);
+  - `Shadow` com `inner` (sombras internas e profundidade 3D).
+- **Shaders Customizados (SkSL):** Efeitos líquidos, partículas, distorções e iluminação dinâmica pixel a pixel.
+- **Integração Nativa com UI Thread:** Ligação direta com `SharedValue` do Reanimated e gestos do `GestureHandler`.
+
+### Tem alguma limitação?
+Sim — por ser um motor de desenho 2D em `<Canvas>`, existem pontos de atenção importantes:
+1. **Sem Flexbox automático:** Dentro do `<Canvas>`, os elementos não usam `flex` — posições `x` e `y` precisam ser calculadas manualmente.
+2. **Canvas é um bloco único:** Não há eventos de toque nativos (`onPress`) individuais em cada forma desenhada nem seleção de texto; toques exigem cálculo de coordenadas (*hit-test* manual) e o texto vira pixel (exigindo camadas de UI ou configuração extra para leitores de tela como TalkBack/VoiceOver, além de não ser indexável por SEO na Web).
+3. **Tipografia:** Fontes exigem carregamento explícito (`useFont()`) ou integração com os motores de texto do sistema.
+4. **Não é engine 3D nem player de vídeo:** O Skia não decodifica vídeos (MP4/H.264 — papel de `MediaCodec`/`ExoPlayer`) e não calcula câmera/profundidade 3D nativa (para 3D, trabalha em conjunto com motores como **TypeGPU**, fornecendo texturas 2D).
+
+### Quais as principais diferenças entre recursos similares?
+| Tecnologia | Foco Principal | Diferença em relação ao React Native Skia |
+| :--- | :--- | :--- |
+| **React Native Skia** | Gráficos 2D dinâmicos, filtros e *shaders* na GPU | Desenha e reage pixel a pixel em tempo real a 60/120 FPS com total controle programático. |
+| **Lottie (`lottie-react-native`)** | Animações pré-exportadas (After Effects / JSON) | Ótimo para ícones e ilustrações prontas, mas **não** gera gráficos dinâmicos baseados em dados nem responde com *shaders* e física em tempo real. |
+| **`react-native-svg`** | Vetores na árvore nativa | Cria cada forma como um elemento nativo separado; funciona bem para ícones estáticos, mas **gargala na CPU** ao animar muitos elementos simultâneos. |
+| **Three.js / Filament / TypeGPU** | Engines 3D | Focadas em cenas 3D com câmera, malhas e profundidade; o Skia é especialista em **2D** (podendo gerar texturas 2D para o TypeGPU). |
+
+---
+
+## 📸 Capturas de Tela do App (Avengers: Doomsday — `Skia GPU FX: ON`)
+
+| Doutor Destino (Máscara Metálica & Raios Arcanos) | Quarteto Fantástico (Plasma & Campo Hexagonal) | X-Men (Relevo Metálico & Partículas) |
+| :---: | :---: | :---: |
+| ![Doutor Destino no Skia](docs/images/doutor-destino-skia.png) | ![Quarteto Fantástico no Skia](docs/images/quarteto-fantastico-skia.png) | ![X-Men no Skia](docs/images/xmen-skia.png) |
+
+---
+
+## 🌌 Avengers: Doomsday (2026) — Experiência Cinematográfica em Modo Paisagem
 
 Aplicação interativa cinematográfica em **React Native com Expo (100% compatível com Expo Go + TypeScript)** inspirada em **"AVENGERS: DOOMSDAY" (2026)**, utilizando:
 - **`@shopify/react-native-skia`**: Renderização vetorial procedural acelerada na GPU (`SweepGradient`, `RadialGradient`, `LinearGradient`, `BlurMask`, `BackdropBlur`, `Shadow` com `inner`).
@@ -8,85 +70,40 @@ Aplicação interativa cinematográfica em **React Native com Expo (100% compat�
 - **`expo-sensors` (`Gyroscope`)**: Reflexo metálico especular e parallax multicamadas controlados pela inclinação física do celular.
 - **`expo-haptics`**: Feedback tátil sincronizado com cada poder e transição.
 
----
+### 🖥️ Layout Dividido em Modo Paisagem (55% Palco | 45% Card Glassmorphism)
+- **Lado Esquerdo (55% da largura):** Palco principal no `<Canvas>` do Skia onde fica o **emblema 3D/realista do personagem ou equipe**, matematicamente centralizado em `(cx, cy) = (stageWidth / 2, stageHeight / 2)`.
+- **Lado Direito (45% da largura):** Card flutuante com efeito **vidro fosco (`<BackdropBlur blur={20}>`)**, borda metálica, curiosidade oficial e indicador de navegação.
+- **Canto Superior Esquerdo (`Skia GPU FX: ON / OFF`):** Botão para demonstração técnica ao vivo (inicia em **OFF**), ligando/desligando gradientes metálicos, `SweepGradient`, `BlurMask`, `BackdropBlur` e partículas para comparar formas básicas 2D vs. gráficos acelerados pela GPU.
 
-## 🖥️ Layout Dividido em Modo Paisagem (55% Palco | 45% Card Glassmorphism)
-
-- **Lado Esquerdo (55% da largura):** Palco principal no `<Canvas>` do Skia onde fica o **emblema 3D/realista do personagem ou equipe**, matematicamente centralizado em `(cx, cy) = (stageWidth / 2, stageHeight / 2)` através de grupos locais na origem `(0, 0)` (garantindo **zero** desvios de alinhamento em qualquer resolução).
-- **Lado Direito (45% da largura):** Card flutuante com efeito **vidro fosco (`<BackdropBlur blur={20}>`)** e borda metálica lapidada, exibindo:
-  - Tag da equipe/facção e **Nome do Personagem/Equipe**.
-  - **Curiosidade Oficial** (fatos reais dos quadrinhos da Marvel e da produção de *Avengers: Doomsday*).
-  - Dica interativa do poder do emblema e indicador de navegação (*"Arraste para o lado para trocar • Toque no emblema para ativar"*).
-- **Canto Superior Esquerdo (`Skia GPU FX: ON / OFF`):** Botão discreto para demonstração técnica em sala de aula (inicia em **OFF** para facilitar a comparação ao vivo), ligando/desligando gradientes metálicos, `SweepGradient`, `BlurMask`, `BackdropBlur` e partículas para comparar formas básicas 2D vs. gráficos realistas acelerados pela GPU.
-
----
-
-## 🎬 Os 5 Slides Interativos
-
-1. **AVENGERS: DOOMSDAY (Logo Oficial):**
-   - **Visual & Fundo:** Névoa cósmica verde-esmeralda (`RadialGradient`) e runas arcanas flutuantes. Emblema metálico prateado `"A"` atravessando um anel chanfrado com aura verde brilhante (`BlurMask`).
-   - **Interação:** Incline o celular para ver o reflexo metálico deslizar; toque para emitir uma onda de choque verde.
-2. **DOUTOR DESTINO / VICTOR VON DOOM (Máscara Metálica):**
-   - **Visual & Fundo:** Fundo sombrio com raios de magia arcana verde-esmeralda e máscara de aço escovado realista (com rebites metálicos, sombreamento 3D e olhos brilhando em verde intenso) emoldurada pelo capuz verde-escuro.
-   - **Interação:** Segure o dedo na máscara para carregar energia arcana com vibração tátil (`expo-haptics`) e disparar raios verdes.
-3. **QUARTETO FANTÁSTICO (Emblema "4" + Fogo & Campo de Força):**
-   - **Visual & Fundo:** Fundo azul-cósmico com faíscas incandescentes de plasma laranja/amarelo subindo pela tela (Tocha Humana), malha hexagonal translúcida (Mulher Invisível) e o emblema circular `"4"` perfeitamente centralizado em `(0, 0) -> (cx, cy)`.
-   - **Interação:** Arraste o dedo sobre o emblema para gerar rastros de chamas em tempo real na GPU.
-4. **CAPITÃO AMÉRICA (Escudo de Vibranium Realista):**
-   - **Visual & Fundo:** Fundo azul-marinho atmosférico com anéis concêntricos de metal escovado (`SweepGradient` cônico vermelho, prata, vermelho e núcleo azul) e a estrela prateada de 5 pontas calculada trigonometricamente com `Math.cos` e `Math.sin`.
-   - **Interação:** Toque no escudo para fazê-lo girar em alta velocidade soltando faíscas cinéticas de impacto com vibração tátil.
-5. **X-MEN (Emblema "X" + Garras de Adamantium):**
-   - **Visual & Fundo:** Feixes de energia dourada e azul elétrico com o emblema circular `"X"` em relevo 3D metálico prateado e núcleo escuro.
-   - **Interação:** Deslize o dedo diagonalmente sobre o emblema (ou toque) para criar **3 cortes brilhantes de garras de Adamantium** com faíscas metálicas que vão cicatrizando aos poucos.
+### 🎬 Os 5 Slides Interativos
+1. **AVENGERS: DOOMSDAY (Logo Oficial):** Névoa cósmica verde-esmeralda, runas arcanas, emblema `"A"` metálico com `BlurMask` e onda de choque ao toque.
+2. **DOUTOR DESTINO / VICTOR VON DOOM:** Máscara de aço escovado com rebites, olhos brilhantes e carregamento de energia arcana por pressão longa com `expo-haptics`.
+3. **QUARTETO FANTÁSTICO:** Faíscas incandescentes de plasma, malha hexagonal translúcida e rastros de chamas ao arrastar o dedo sobre o `"4"`.
+4. **CAPITÃO AMÉRICA:** Escudo de Vibranium com anéis metálicos (`SweepGradient`) e estrela trigonométrica que gira com faíscas ao toque.
+5. **X-MEN:** Emblema `"X"` em relevo 3D metálico prateado/dourado com cortes brilhantes de garras de Adamantium ao deslizar o dedo.
 
 ---
 
-## 🚀 Passo a Passo Seguro para Apresentar na Sala de Aula
+## 🚀 Passo a Passo para Rodar o Projeto
 
-> **Importante:** O app inicia com **Skia GPU FX: OFF** no canto superior esquerdo para você mostrar a versão simples primeiro e depois tocar no botão para ativar os efeitos de GPU ao vivo.
-
-### 1. Verificar / Instalar o que pode faltar no PC da sala (Windows)
-Abra o **PowerShell** (ou Terminal) e verifique se `git` e `node` estão instalados:
-
+### 1. Verificar dependências no PC (Windows)
 ```powershell
 node -v
 npm -v
 git --version
 ```
 
-- **Se `node` não for reconhecido:** instale o Node.js LTS pelo `winget` (sem precisar abrir navegador):
-  ```powershell
-  winget install --id OpenJS.NodeJS.LTS -e --accept-package-agreements --accept-source-agreements
-  ```
-  *(Depois feche e abra o PowerShell novamente para atualizar o `PATH`).*
-- **Se `git` não for reconhecido:** instale pelo `winget` ou baixe o ZIP direto no GitHub (`Code → Download ZIP`):
-  ```powershell
-  winget install --id Git.Git -e --accept-package-agreements --accept-source-agreements
-  ```
-
-### 2. Baixar o projeto e instalar dependências
+### 2. Clonar o repositório e instalar pacotes
 ```powershell
-git clone https://github.com/niickcodes/avengers-doomsday-skia.git
-cd avengers-doomsday-skia
+git clone https://github.com/niickcodes/react-native-skia.git
+cd react-native-skia
 npm install
 ```
 
-*(Caso o `git` não esteja instalado e você tenha baixado o `.zip`, extraia a pasta, entre nela pelo terminal e rode apenas `npm install`).*
-
-### 3. Iniciar o servidor para a turma escanear o QR Code
-No terminal dentro da pasta do projeto, rode **com túnel** (funciona mesmo com os celulares nos dados móveis ou em Wi-Fi diferente):
-
+### 3. Iniciar o servidor para escanear o QR Code no Expo Go
 ```powershell
 npx expo start --tunnel -c
 ```
-
-- **Se pedir para instalar `@expo/ngrok`:** digite `y` e pressione Enter.
-- **Mantenha essa janela do terminal aberta durante toda a apresentação** — se fechar o terminal, o QR Code para de responder.
-- Peça para quem for testar abrir o app **Expo Go** (SDK 58 / versão `58.0.5`+) no celular e escanear o QR Code que apareceu no terminal.
-
-### 4. Plano B (se o firewall da sala bloquear o `--tunnel`)
-1. **Mesmo Wi-Fi (LAN):** Conecte o PC e o celular na mesma rede Wi-Fi (ou roteie a internet do seu celular para o PC) e rode:
-   ```powershell
-   npx expo start -c
-   ```
-2. **Direto da nuvem (`expo.dev`) no seu celular:** Abra o **Expo Go**, faça login na conta **`niickcodes`** e abra o projeto direto na aba **Home** (ou pelo QR Code de *Updates* no painel `expo.dev`) — não depende de servidor no PC.
+- Se pedir para instalar `@expo/ngrok`, digite `y` e pressione Enter.
+- Abra o **Expo Go** (SDK 58) no celular e escaneie o QR Code.
+- **Plano B (mesma rede Wi-Fi):** rode `npx expo start -c`.
